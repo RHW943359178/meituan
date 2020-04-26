@@ -11,7 +11,7 @@
       </header>
     </body>
     <div class="section">
-      <el-form :model="ruleForm" :rules="rules" label-width="100px">
+      <el-form :model="ruleForm" ref="ruleForm" :rules="rules" label-width="100px">
         <el-form-item label="昵称" prop="name">
           <el-input v-model="ruleForm.name" clearable></el-input>
         </el-form-item>
@@ -60,7 +60,8 @@ export default {
           {required: true, type: 'string', message: '请输入昵称', trigger: 'blur'}
         ],
         email: [
-          {required: true, type: 'email', message: '请输入邮箱', trigger: 'blur'}
+          {required: true, type: 'string', message: '请输入邮箱', trigger: 'blur'},
+          {required: true, type: 'email', message: '邮箱格式错误', trigger: 'blur'},
         ],
         code: [
           {required: true, message: '请输入验证码', trigger: 'blur'}
@@ -87,7 +88,44 @@ export default {
   },
   methods: {
     sendMsg() {
-
+      let namePass, emailPass
+      
+      // if (this.timerid) {
+      //   return false
+      // }
+      this.$refs['ruleForm'].validateField('name', valid => {
+        namePass = valid
+      })
+      this.statusMsg = ''
+      if (namePass) {
+        return false
+      }
+      this.$refs['ruleForm'].validateField('email', valid => {
+        emailPass = valid
+      })      
+      if (!namePass && !emailPass) {
+        this.$axios.post('/users/verify', {
+          username: encodeURIComponent(this.ruleForm.name),
+          email: this.ruleForm.email
+        }).then(({status, data}) => {
+          console.log(status);
+          console.log(data);
+          
+          if (status === 200 && data && data.code === 0) {
+            let count = 60
+            this.statusMsg = `验证码已发送，剩余${count --}秒`
+            let timerid = setInterval(() => {
+              this.statusMsg = `验证码已发送，剩余${count --}秒`
+              if (count === 0) {
+                clearInterval(timerid)
+                this.statusMsg = ''
+              }
+            }, 1000);
+          } else {
+            this.statusMsg = data.message
+          }
+        })
+      }
     },
     register() {
 
