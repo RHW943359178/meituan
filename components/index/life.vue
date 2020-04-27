@@ -5,7 +5,7 @@
         <slider/>
       </el-col>
       <el-col :span="4">
-        <div class="m-life-pic"/>
+        <div class="m-life-pic"></div>
       </el-col>
       <el-col :span="6">
         <div class="m-life-login">
@@ -59,5 +59,4 @@ export default {
 </script>
 
 <style>
-
 </style>

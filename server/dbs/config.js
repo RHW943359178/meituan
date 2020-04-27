@@ -16,7 +16,9 @@
       return '943359178@qq.com'
     },
     get pass() {
-      return 'ypal xmad bjwy bccj'
+      // return 'ypal xmad bjwy bccj'
+      // return 'jrls zqbe teal bbbc'
+      return 'akxyobrhyhdkbbbc'
     },
     get code() {
       return () => {
