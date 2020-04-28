@@ -29,9 +29,14 @@ router.post('/signup', async ctx => {
   /**
    * 校验验证码
    */
+  console.log(ctx.request.body);
+  
   if (code) {
     const saveCode = await Store.hget(`nodemail: ${username}`, 'code')
     const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
+    console.log(saveCode, 'saveCode');
+    console.log(saveExpire, 'saveExpire');
+    
     //  判断请求体中的code和redis中的code是否一致
     if (code === saveCode) {
       //  判断验证码是否过期
@@ -62,6 +67,8 @@ router.post('/signup', async ctx => {
   let user = await User.find({
     username
   })
+  console.log(User, 'User');
+  
   //  判断用户名是否已经被注册
   if (user.length) {
     ctx.body = {
@@ -82,6 +89,8 @@ router.post('/signup', async ctx => {
       username,
       password
     })
+    console.log(result, 'result');
+    
     if (result.date && result.data.code === 0) {
       ctx.body = {
         code: 0,
@@ -139,7 +148,6 @@ router.post('/verify', async (ctx, next) => {
   let username = ctx.request.body.username
   const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
   
-  console.log(saveExpire, 'saveExpire');
   
   //  限制频繁请求验证，一分钟一次
   // console.log(new Date().getTime() - saveExpire, 111);

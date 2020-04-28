@@ -13,7 +13,7 @@
     <div class="section">
       <el-form :model="ruleForm" ref="ruleForm" :rules="rules" label-width="100px">
         <el-form-item label="昵称" prop="name">
-          <el-input v-model="ruleForm.name" clearable></el-input>
+          <el-input v-model="ruleForm.username" clearable></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="ruleForm.email" clearable></el-input>
@@ -58,7 +58,7 @@ export default {
         cpwd: ''
       },
       rules: {
-        name: [
+        username: [
           {required: true, type: 'string', message: '请输入昵称', trigger: 'blur'}
         ],
         email: [
@@ -114,11 +114,8 @@ export default {
           username: encodeURIComponent(this.ruleForm.name),
           email: this.ruleForm.email
         }).then(({status, data}) => {
-          console.log(status);
-          console.log(data);
-          
           if (status === 200 && data && data.code === 0) {
-            let count = 60
+            let count = 600
             this.statusMsg = `验证码已发送，剩余${count --}秒`
             this.timerid = setInterval(() => {
               this.statusMsg = `验证码已发送，剩余${count --}秒`
@@ -136,12 +133,15 @@ export default {
     register() {
       this.$refs['ruleForm'].validate(valid => {
         if (valid) {
-          this.$axios.post('/users/singup', {
+          this.$axios.post('/users/signup', {
+            // username: encodeURIComponent(this.ruleForm.username),
             username: encodeURIComponent(this.ruleForm.username),
             password: CryptoJS.MD5(this.ruleForm.pwd).toString(), //  MD5加密，toSting()方法将其转为md5哈希字符串
             email: this.ruleForm.email,
             code: this.ruleForm.code
           }).then(({status, data}) => {
+            console.log(status, 'status')
+            console.log(data, 'data')
             if (status === 200) {
               if (data && data.code === 0) {
                 location.href = '/login'
