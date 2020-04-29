@@ -30,7 +30,6 @@ router.post('/signup', async ctx => {
    * 校验验证码
    */
   console.log(ctx.request.body);
-  
   if (code) {
     const saveCode = await Store.hget(`nodemail: ${username}`, 'code')
     const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
@@ -52,12 +51,14 @@ router.post('/signup', async ctx => {
         code: -1,
         message: '请填写正确的验证码'
       }
+      return false
     }
   } else {
     ctx.body = {
       code: -1,
       message: '请输入验证码'
     }
+    return false
   }
 
   /**
@@ -83,26 +84,44 @@ router.post('/signup', async ctx => {
     password,
     email
   })
-  //  校验写库的状态
+  // //  校验写库的状态
   if (nuser) {
-    let result = axios.post('/users/signin', {
+    // let result = axios.post('/users/signin', {
+    //   username,
+    //   password
+    // })
+    // console.log(result, 'result');
+    
+    // if (result.date && result.data.code === 0) {
+    //   ctx.body = {
+    //     code: 0,
+    //     message: '注册成功',
+    //     user: result.data.user
+    //   }
+    // } else {
+    //   ctx.body = {
+    //     code: -1,
+    //     message: 'error'
+    //   }
+    // }
+    axios.post('/users/signin', {
       username,
       password
+    }).then(result => {
+      console.log(result, 'result');
+      if (result.date && result.data.code === 0) {
+        ctx.body = {
+          code: 0,
+          message: '注册成功',
+          user: result.data.user
+        }
+      } else {
+        ctx.body = {
+          code: -1,
+          message: 'error'
+        }
+      }
     })
-    console.log(result, 'result');
-    
-    if (result.date && result.data.code === 0) {
-      ctx.body = {
-        code: 0,
-        message: '注册成功',
-        user: result.data.user
-      }
-    } else {
-      ctx.body = {
-        code: -1,
-        message: 'error'
-      }
-    }
   } else {
     ctx.body = {
       code: -1,
@@ -144,6 +163,7 @@ router.post('/signin', (ctx, next) => {
  */
 router.post('/verify', async (ctx, next) => {
 
+  console.log(ctx, 'ctx');
   
   let username = ctx.request.body.username
   const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
@@ -177,7 +197,7 @@ router.post('/verify', async (ctx, next) => {
     email: ctx.request.body.email,
     user: ctx.request.body.username
   }
-
+  console.log(ko, 'ko')
   //  邮箱内容选项
   let mailOption = {
     from: `"认证邮箱" <${Email.smtp.user}>`,
@@ -191,6 +211,7 @@ router.post('/verify', async (ctx, next) => {
     if (err) {
       return console.log(err, 'err')
     } else {
+      console.log('send email success')
       Store.hmset('nodemail: ${ko.user}', 'code', ko.code, 'expire', ko.expire, 'email', ko.email)
     }
   })

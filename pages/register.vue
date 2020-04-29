@@ -12,7 +12,7 @@
     </body>
     <div class="section">
       <el-form :model="ruleForm" ref="ruleForm" :rules="rules" label-width="100px">
-        <el-form-item label="昵称" prop="name">
+        <el-form-item label="昵称" prop="username">
           <el-input v-model="ruleForm.username" clearable></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
@@ -95,8 +95,6 @@ export default {
       if (this.timerid) {
         return false
       }
-      console.log(1111111111);
-      
       this.$refs['ruleForm'].validateField('name', valid => {
         namePass = valid
       })
@@ -107,8 +105,6 @@ export default {
       this.$refs['ruleForm'].validateField('email', valid => {
         emailPass = valid
       })
-      console.log(222222222222);
-          
       if (!namePass && !emailPass) {
         this.$axios.post('/users/verify', {
           username: encodeURIComponent(this.ruleForm.name),
