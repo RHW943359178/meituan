@@ -27,7 +27,7 @@
     },
     get expire() {
       return () => {
-        return new Date().getTime() + 60*60*10000
+        return new Date().getTime() + 60*1000
       }
     }
   }

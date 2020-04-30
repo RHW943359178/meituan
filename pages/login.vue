@@ -36,7 +36,25 @@ export default {
   layout: 'blank',
   methods: {
     login() {
+      this.$axios.post('users/signin', {
+        username: encodeURIComponent(this.username),
+        password: CryptoJS.MD5(this.password)
+      }).then(({status, data}) => {
+        if (status === 2000) {
+          if (data && data.code === 0) {
+            location.href = '/'
+          } else {
+            this.err = data.message
+          }
+        } else {
+          this.error = `服务器出错，${data.message}`
+        }
+      })
 
+      //  定时器清除错误信息
+      setTimeout(() => {
+        this.error = ''
+      }, 1500)
     }
   }
 }

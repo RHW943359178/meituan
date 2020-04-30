@@ -33,9 +33,7 @@ router.post('/signup', async ctx => {
   if (code) {
     const saveCode = await Store.hget(`nodemail: ${username}`, 'code')
     const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
-    console.log(saveCode, 'saveCode');
-    console.log(saveExpire, 'saveExpire');
-    
+
     //  判断请求体中的code和redis中的code是否一致
     if (code === saveCode) {
       //  判断验证码是否过期
@@ -86,42 +84,26 @@ router.post('/signup', async ctx => {
   })
   // //  校验写库的状态
   if (nuser) {
-    // let result = axios.post('/users/signin', {
-    //   username,
-    //   password
-    // })
-    // console.log(result, 'result');
-    
-    // if (result.date && result.data.code === 0) {
-    //   ctx.body = {
-    //     code: 0,
-    //     message: '注册成功',
-    //     user: result.data.user
-    //   }
-    // } else {
-    //   ctx.body = {
-    //     code: -1,
-    //     message: 'error'
-    //   }
-    // }
-    axios.post('/users/signin', {
+    console.log(nuser, 'nuser')
+    // let result = await axios.post('/users/signin', {
+    let result = await axios.post('http://127.0.0.1:3000/users/signin', {
       username,
       password
-    }).then(result => {
-      console.log(result, 'result');
-      if (result.date && result.data.code === 0) {
-        ctx.body = {
-          code: 0,
-          message: '注册成功',
-          user: result.data.user
-        }
-      } else {
-        ctx.body = {
-          code: -1,
-          message: 'error'
-        }
-      }
     })
+    console.log(result, 'result');
+    
+    if (result.data && result.data.code === 0) {
+      ctx.body = {
+        code: 0,
+        message: '注册成功',
+        user: result.data.user
+      }
+    } else {
+      ctx.body = {
+        code: -1,
+        message: 'error'
+      }
+    }
   } else {
     ctx.body = {
       code: -1,
@@ -133,8 +115,12 @@ router.post('/signup', async ctx => {
 /**
  * 登录
  */
-router.post('/signin', (ctx, next) => {
+router.post('/signin', async (ctx, next) => {
   return Passport.authenticate('local', (err, user, info, status) => {
+    console.log(err, 'err');
+    console.log(user, 'user');
+    console.log(info, 'info');
+    
     if (err) {
       ctx.body = {
         code: -1,
@@ -163,19 +149,20 @@ router.post('/signin', (ctx, next) => {
  */
 router.post('/verify', async (ctx, next) => {
 
-  console.log(ctx, 'ctx');
+  // console.log(ctx, 'ctx');
   
   let username = ctx.request.body.username
   const saveExpire = await Store.hget(`nodemail: ${username}`, 'expire')
   
   
   //  限制频繁请求验证，一分钟一次
-  // console.log(new Date().getTime() - saveExpire, 111);
+  console.log(saveExpire && new Date().getTime() - saveExpire, 111);
+
   
   if (saveExpire && new Date().getTime() - saveExpire < 0) {
     ctx.body = {
       code: -1,
-      message: '验证请求过于频繁，1分钟一次'
+      message: '验证请求过于频繁，10分钟一次'
     }
     return false
   }
@@ -212,7 +199,7 @@ router.post('/verify', async (ctx, next) => {
       return console.log(err, 'err')
     } else {
       console.log('send email success')
-      Store.hmset('nodemail: ${ko.user}', 'code', ko.code, 'expire', ko.expire, 'email', ko.email)
+      Store.hmset(`nodemail: ${ko.user}`, 'code', ko.code, 'expire', ko.expire, 'email', ko.email)
     }
   })
   ctx.body = {

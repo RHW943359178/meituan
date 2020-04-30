@@ -44,6 +44,9 @@ module.exports = {
   modules: [
     '@nuxtjs/axios'
   ],
+  axios: {
+    proxy: true // Can be also an object with default options
+  },
   /*
   ** Build configuration
   */
@@ -65,7 +68,7 @@ module.exports = {
     cache: false
   },
   server: {
-    port: 8080, // default: 3000
+    port: 3000, // default: 3000
     host: 'localhost', // default: localhost
   },
 }

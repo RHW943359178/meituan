@@ -91,6 +91,7 @@ export default {
   methods: {
     sendMsg() {
       let namePass, emailPass
+      console.log(this.timerid, 123);
       
       if (this.timerid) {
         return false
@@ -107,7 +108,7 @@ export default {
       })
       if (!namePass && !emailPass) {
         this.$axios.post('/users/verify', {
-          username: encodeURIComponent(this.ruleForm.name),
+          username: encodeURIComponent(this.ruleForm.username),
           email: this.ruleForm.email
         }).then(({status, data}) => {
           if (status === 200 && data && data.code === 0) {
@@ -145,7 +146,7 @@ export default {
                 this.error = data.message
               }
             } else {
-              this.error = `服务器出错，错误码：${status}`
+              this.error = `服务器出错，错误码：${data}`
             }
             //  定时器清空错误信息
             setTimeout(() => {
