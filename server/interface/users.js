@@ -5,6 +5,7 @@ import User from '../dbs/modules/users';
 import Passport from './utils/passport';
 import Email from '../dbs/config'
 import axios from './utils/axios'
+import passport from './utils/passport';
 
 //  获取路由实例
 let router = new Router({
@@ -116,11 +117,10 @@ router.post('/signup', async ctx => {
  * 登录
  */
 router.post('/signin', async (ctx, next) => {
-  return Passport.authenticate('local', (err, user, info, status) => {
-    console.log(err, 'err');
-    console.log(user, 'user');
-    console.log(info, 'info');
-    
+  return Passport.authenticate('local', (err, user, info) => {
+    console.log(err, 'err')
+    console.log(user, 'user')
+    console.log(info, 'info')
     if (err) {
       ctx.body = {
         code: -1,
@@ -130,7 +130,8 @@ router.post('/signin', async (ctx, next) => {
       if (user) {
         ctx.body = {
           code: 0,
-          message: '登录成功'
+          message: '登录成功',
+          user
         }
         //  登录动作
         return ctx.login(user)
@@ -213,7 +214,7 @@ router.post('/verify', async (ctx, next) => {
  */
 router.get('/exit', async (ctx, next) => {
   await ctx.logout()
-  if (!ctx.isAuthenticated) {
+  if (!ctx.isAuthenticated()) {
     ctx.body = {
       code: 0
     }
@@ -228,8 +229,8 @@ router.get('/exit', async (ctx, next) => {
  * 获取用户名
  */
 router.get('/getUser', async ctx => {
-  if (ctx.isAuthenticated) {
-    const {username, email} =  ctx.session.Passport.user
+  if (ctx.isAuthenticated()) {
+    const {username, email} =  ctx.session.passport.user
     ctx.body = {
       user: username,
       email

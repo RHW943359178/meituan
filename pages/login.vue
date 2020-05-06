@@ -11,7 +11,7 @@
         <h4 v-if="error" class="tips"><i>{{error}}</i></h4>
         <p><span>账号登录</span></p>
         <el-input v-model="username" prefix-icon="profile" clearable></el-input>
-        <el-input v-model="password" prefix-icon="password" type="password" clearable></el-input>
+        <el-input v-model="password" prefix-icon="password" type="password" @keydown.enter="login" clearable></el-input>
         <div class="foot">
           <el-checkbox v-model="checked">7天内自动登录</el-checkbox>
           <b>忘记密码</b>
@@ -38,12 +38,13 @@ export default {
     login() {
       this.$axios.post('users/signin', {
         username: encodeURIComponent(this.username),
-        password: CryptoJS.MD5(this.password)
+        password: CryptoJS.MD5(this.password).toString()
       }).then(({status, data}) => {
-        if (status === 2000) {
+        if (status === 200) {
           if (data && data.code === 0) {
             location.href = '/'
           } else {
+            console.log(data, 'data')
             this.err = data.message
           }
         } else {
